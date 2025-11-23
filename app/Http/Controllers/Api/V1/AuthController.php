@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Profile; // تأكد إن الموديل ده موجود (حتى لو لسه فاضي)
+use App\Models\Profile; // ⬅️ تم استدعاء الموديل
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB; // ⬅️ تم استدعاء الـ DB Facade
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -18,27 +19,28 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:client,freelancer', // الأدوار المسموح التسجيل بها فقط
+            'role' => 'required|in:client,freelancer',
         ]);
 
-        // 1. إنشاء المستخدم
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        $user = DB::transaction(function () use ($request) {
+            
+            // 1. إنشاء المستخدم
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
 
-        // 2. تعيين الدور (Spatie)
-        $user->assignRole($request->role);
+            // 2. تعيين الدور
+            $user->assignRole($request->role);
 
-        // 3. إنشاء بروفايل فارغ فوراً (عشان نتجنب مشاكل الـ null قدام)
-        // ملاحظة: تأكد إنك عملت موديل Profile وميجريشن زي ما اتفقنا
-        // لو لسه معملتوش، شيل السطر ده مؤقتاً لحد Milestone 2
-        if (class_exists(Profile::class)) {
-             $user->profile()->create([]);
-        }
+            // 3. ⭐️ إنشاء بروفايل فارغ فوراً (ضمن Transaction)
+            $user->profile()->create([]);
 
-        // 4. إنشاء التوكن
+            return $user;
+        });
+
+        // 4. إنشاء التوكن (بعد نجاح الترانزاكشن)
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -78,7 +80,6 @@ class AuthController extends Controller
     // تسجيل الخروج
     public function logout(Request $request)
     {
-        // مسح التوكن الحالي فقط (عشان لو داخل من جهاز تاني مايخرجش منه)
         $request->user()->currentAccessToken()->delete();
 
         return response()->json(['message' => 'Logged out successfully']);

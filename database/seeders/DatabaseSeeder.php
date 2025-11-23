@@ -17,7 +17,8 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
         $this->call([
-          RoleSeeder::class, // <-- 3. ضيف السطر ده هنا
+          RoleSeeder::class,
+          SkillSeeder::class // <-- 3. ضيف السطر ده هنا
         ]);
         User::factory()->create([
             'name' => 'Test User',
