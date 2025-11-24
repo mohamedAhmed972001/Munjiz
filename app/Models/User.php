@@ -70,4 +70,23 @@ public function bids()
 {
     return $this->hasMany(Bid::class, 'freelancer_id');
 }
+// ... داخل الكلاس
+
+// التقييمات التي تلقاها المستخدم (Reviewed)
+public function receivedReviews()
+{
+    return $this->hasMany(Review::class, 'reviewed_id');
+}
+
+// التقييمات التي قام بها المستخدم (Reviewer)
+public function givenReviews()
+{
+    return $this->hasMany(Review::class, 'reviewer_id');
+}
+
+// دالة لحساب متوسط التقييمات (ميزة إضافية)
+public function averageRating()
+{
+    return $this->receivedReviews()->avg('rating');
+}
 }

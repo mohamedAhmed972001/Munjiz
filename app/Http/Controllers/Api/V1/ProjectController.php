@@ -63,6 +63,32 @@ class ProjectController extends Controller
 
         return response()->json($project);
     }
+// ... داخل الكلاس ProjectController
+
+// ⭐️ دالة لإكمال المشروع (Completed)
+public function complete(Request $request, Project $project)
+{
+    $user = $request->user();
+
+    // 1. التحقق من الصلاحيات: يجب أن يكون المستخدم هو العميل صاحب المشروع
+    if ($user->id !== $project->client_id) {
+        return response()->json(['message' => 'Unauthorized. Only the client can mark the project as complete.'], 403);
+    }
+
+    // 2. التحقق من حالة المشروع: يجب أن يكون قيد التنفيذ
+    if ($project->status !== 'in_progress') {
+        return response()->json(['message' => 'Project must be "in_progress" to be marked as complete.'], 400);
+    }
+    
+    // 3. تحديث الحالة
+    $project->status = 'completed';
+    $project->save();
+
+    return response()->json([
+        'message' => 'Project marked as completed. Ready for review.',
+        'project' => $project,
+    ]);
+}
 
     // باقي دوال الـ resource (update, destroy) يمكن إضافتها لاحقاً للتعديل أو الإلغاء
 }

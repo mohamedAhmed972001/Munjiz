@@ -36,4 +36,11 @@ class Project extends Model
     {
         return $this->hasMany(Bid::class);
     }
+    // ... داخل الكلاس
+
+// التقييمات المتعلقة بالمشروع (غالباً تقييم واحد من العميل وواحد من المستقل)
+public function reviews()
+{
+    return $this->hasMany(Review::class);
+}
 }

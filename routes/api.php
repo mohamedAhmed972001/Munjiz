@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\ProfileController;
-
+use App\Http\Controllers\Api\V1\ReviewController;
 Route::prefix('v1')->group(function () {
     
   // --- Public Routes (مفتوحة للكل) ---
@@ -29,9 +29,11 @@ Route::prefix('v1')->group(function () {
     Route::get('/projects/{project}', [ProjectController::class, 'show']); 
     // store متاح للعملاء فقط (التحقق داخل الكونترولر)
     Route::post('/projects', [ProjectController::class, 'store']); 
-
+    Route::post('/projects/{project}/complete', [ProjectController::class, 'complete']); // ⬅️ الرابط الجديد
     // Bid Routes
     Route::post('/bids', [BidController::class, 'store']); // تقديم عرض (للمستقلين)
     Route::post('/bids/{bid}/accept', [BidController::class, 'accept']); // قبول عرض (للعملاء)
+    // Review Routes
+    Route::post('/reviews', [ReviewController::class, 'store']);
   });
 });
