@@ -16,7 +16,10 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // User::factory(10)->create();
-
+        $this->call([
+          RoleSeeder::class,
+          SkillSeeder::class // <-- 3. ضيف السطر ده هنا
+        ]);
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
